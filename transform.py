@@ -40,7 +40,7 @@ class StreamEditorEDWTables(StreamEditor):
     def apply_match(self, i, dict_matches):
         start, end = dict_matches["start"], dict_matches["end"]
         if not (end is None):
-            table_name = self.lines[start].split('.')[1].replace("[", "").replace("]", "").replace("(", "")
+            table_name = self.lines[start].split('.')[1].strip("[](")
 
             # Replace `[counter] IDENTITY...` with `[counter]`
             for (counter_i, counter_d) in self.find_line(COUNTER_REGEX, self.lines[start:end]):
