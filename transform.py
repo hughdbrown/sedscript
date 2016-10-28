@@ -17,9 +17,17 @@ CREATE_TABLE = re.compile(r'''
     $
 ''', re.VERBOSE)
 
-GO = re.compile(r'''
+GO = re.compile(r'''^GO$''')
+
+COUNTER_REGEX = re.compile(r'''
     ^
-    GO
+    \s*
+    \[counter\]
+    \s+
+    \[int\]
+    \s+
+    (?P<identity>IDENTITY\(.+?\))
+    .*
     $
 ''', re.VERBOSE)
 
@@ -30,23 +38,12 @@ class StreamEditorEDWTables(StreamEditor):
     ]
 
     def apply_match(self, i, dict_matches):
-        counter_regex = re.compile(r'''
-            ^
-            \s*
-            \[counter\]
-            \s+
-            \[int\]
-            \s+
-            (?P<identity>IDENTITY\(.+?\))
-            .*
-            $
-        ''', re.VERBOSE)
         start, end = dict_matches["start"], dict_matches["end"]
         if not (end is None):
             table_name = self.lines[start].split('.')[1].replace("[", "").replace("]", "").replace("(", "")
 
             # Replace `[counter] IDENTITY...` with `[counter]`
-            for (counter_i, counter_d) in self.find_line(counter_regex, self.lines[start:end]):
+            for (counter_i, counter_d) in self.find_line(COUNTER_REGEX, self.lines[start:end]):
                 matching = counter_d["identity"]
                 src = start + counter_i
                 self.lines[src] = self.lines[src].replace(matching, "")
